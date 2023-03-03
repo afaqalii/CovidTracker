@@ -1,32 +1,54 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
+import { useState, useEffect } from 'react'
 import './App.css'
+import { FormControl, MenuItem, Select } from '@mui/material'
 
 function App() {
-  const [count, setCount] = useState(0)
+
+  const [Countries, setCountries] = useState([])
+  const [country, setCountry] = useState("worldwide")
+  
+  
+  useEffect(() => {
+    
+    const getCountriesData = async () => {
+      await fetch("https://disease.sh/v3/covid-19/countries")
+      .then(response => response.json())
+      .then(data => {
+        const countries = data.map(country => ( 
+          {
+            name: country.country,
+            value: country.countryInfo.iso2,
+          }
+        ))
+        setCountries(countries)
+      })
+    }
+    getCountriesData()
+  }, [])
+  
+  const getCountryCode =  (e) => {
+    const selectedCountry = e.target.value
+    setCountry(selectedCountry)
+  }
 
   return (
-    <div className="App">
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src="/vite.svg" className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://reactjs.org" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+    <div className="App">    
+    <div className="app__header">
+      <h1>Covid Tracker</h1>
+      <FormControl className='app__dropdown'>
+        <Select 
+          variant='outlined'
+          value={country}
+          onChange={getCountryCode}>
+            <MenuItem value='worldwide'>Worldwide</MenuItem>
+            {
+              Countries.map(country => (
+                 <MenuItem value={country.value}>{country.name}</MenuItem>    
+              ))
+            }
+        </Select>
+      </FormControl>  
+    </div>
     </div>
   )
 }
